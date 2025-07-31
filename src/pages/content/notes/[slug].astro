@@ -1,27 +1,31 @@
 ---
+export const prerender = true;
 import { getCollection } from "astro:content";
 
 import MasterLayout from "../../../layouts/MasterLayout.astro";
 
-const { slug } = Astro.params;
-const notes = await getCollection("notes");
-const note = notes.find((n) => n.slug === slug);
+export async function getStaticPaths() {
+  const notes = await getCollection('notes');
+  return notes.map(note => ({
+    params: { slug: note.slug },
+    props: { note },
+  }));
+}
 
-if (!note) throw new Error("Note not found");
 
-const { rendered, data } = note;
+const { note } = Astro.props;
 ---
 
 <MasterLayout>
   <article>
     <div class="flex space-between items-center">
-      <h1>{data.title}</h1>
+      <h1>{note.data.title}</h1>
     </div>
-    <div class="note-date">{data.date}</div>
+    <div class="note-date">{note.data.date}</div>
 
     <div class="py-md"></div>
 
-    <div class="panel" set:html={rendered?.html}></div>
+    <div class="panel" set:html={note.rendered?.html}></div>
 
   </article>
 </MasterLayout>
