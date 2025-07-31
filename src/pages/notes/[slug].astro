@@ -3,6 +3,7 @@ export const prerender = true;
 import { getCollection } from "astro:content";
 
 import MasterLayout from "../../layouts/MasterLayout.astro";
+import { formatDateTime } from "../../lib/formatDateTime";
 
 export async function getStaticPaths() {
   const notes = await getCollection('notes');
@@ -21,7 +22,7 @@ const { note } = Astro.props;
     <div class="flex space-between items-center">
       <h1>{note.data.title}</h1>
     </div>
-    <div class="note-date">{note.data.date}</div>
+    <div class="note-date">{formatDateTime(note.data.date)}</div>
 
     <div class="py-md"></div>
 

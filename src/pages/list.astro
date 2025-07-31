@@ -24,7 +24,7 @@ const notes = await getCollection("notes");
                 <a href={`${import.meta.env.BASE_URL}/notes/${note.slug}`} class="note-title">
                   {note.data.title}
                 </a>
-                <span class="note-date">{formatDateTime(new Date(note.data.date!.getTime() + note.data.date!.getTimezoneOffset()*60000))}</span>
+                <span class="note-date">{formatDateTime(new Date(note.data.date!.getTime()))}</span>
               </li>
             ))
         }
