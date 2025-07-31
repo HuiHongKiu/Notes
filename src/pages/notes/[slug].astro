@@ -2,7 +2,7 @@
 export const prerender = true;
 import { getCollection } from "astro:content";
 
-import MasterLayout from "../../../layouts/MasterLayout.astro";
+import MasterLayout from "../../layouts/MasterLayout.astro";
 
 export async function getStaticPaths() {
   const notes = await getCollection('notes');
