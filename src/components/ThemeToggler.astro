@@ -1,0 +1,74 @@
+---
+import { MoonStar, Sun } from "lucide-astro";
+---
+
+<button
+    id="themeToggler"
+    class="theme-toggler font-weight: "
+    aria-label="Toggle Light/Dark Mode"
+>
+    <div id="lightMode" class="theme-icon hidden">
+        <Sun />
+    </div>
+    <div id="darkMode" class="theme-icon hidden">
+        <MoonStar />
+    </div>
+</button>
+
+<script is:inline>
+    const darkModeIcon = document.getElementById("darkMode");
+    const lightModeIcon = document.getElementById("lightMode");
+    const toggleButton= document.getElementById("themeToggler");
+
+    themeButtonInit();
+
+    /// Show the theme button (dark / light) only according to current theme.
+    function themeButtonInit() {
+        let theme = localStorage.getItem("theme");
+        let isDarkMode = window.matchMedia &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if(theme != null){
+            isDarkMode = theme == "dark";
+        }
+
+        if (isDarkMode) {
+            darkModeIcon.style.transform = "rotate(180deg)";
+        } else {
+            lightModeIcon.style.transform = "rotate(180deg)";
+        }
+        darkModeIcon.classList.remove("hidden");
+        lightModeIcon.classList.remove("hidden");
+    }
+
+    /// Toggle theme (dark / light).
+    function toggleTheme() {
+        // Ignore if theme is toggling.
+        if(toggleButton.classList.contains('rotating')){
+            return;
+        }
+
+        
+        document.documentElement.classList.toggle("dark");
+
+        let isDarkMode = document.documentElement.classList.contains("dark");
+        localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+
+        
+            toggleButton.classList.add("rotating");
+            setTimeout(function () {
+                toggleButton.classList.remove("rotating");
+                [lightModeIcon, darkModeIcon].forEach((icon) => {
+                    if(icon.style.transform == 'rotate(360deg)'){
+                        icon.style.removeProperty('transform');
+                    }
+                });
+            }, 750);
+
+        lightModeIcon.style.transform = `rotate(${isDarkMode ? 360 : 180}deg)`;
+        darkModeIcon.style.transform = `rotate(${isDarkMode ?  180 : 360}deg)`;
+    }
+
+    document
+        .getElementById("themeToggler")
+        .addEventListener("click", toggleTheme);
+</script>
