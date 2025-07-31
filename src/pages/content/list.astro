@@ -1,0 +1,36 @@
+---
+export const prerender = false; 
+
+import MasterLayout from "../../layouts/MasterLayout.astro";
+import { getCollection } from "astro:content";
+import { formatDateTime } from "../../lib/formatDateTime";
+
+const notes = await getCollection("notes");
+---
+
+<MasterLayout title="Notes">  
+  <div class="flex space-between items-center mb-md">
+    <h2 class="text-lg">Notes List</h2>
+    <a href="/notes/content/editor" class="btn">+ New Note</a>
+  </div>
+
+  {
+    notes.length === 0 ? (
+      <p>No notes found.</p>
+    ) : (
+      <ul class="list">
+        {
+          notes.sort((a, b) => new Date(b.data.date!).getTime() - new Date(a.data.date!).getTime())
+            .map((note) => (
+              <li class="note-item">
+                <a href={`/notes/content/notes/${note.slug}`} class="note-title">
+                  {note.data.title}
+                </a>
+                <span class="note-date">{formatDateTime(new Date(note.data.date!.getTime() + note.data.date!.getTimezoneOffset()*60000))}</span>
+              </li>
+            ))
+        }
+      </ul>
+    )
+  }
+</MasterLayout>

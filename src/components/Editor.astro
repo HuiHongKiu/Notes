@@ -1,0 +1,97 @@
+---
+const repo = "Notepad";
+const owner = "HuiHongKiu";
+const branch = "main";
+
+const repoUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
+
+import { formatDateTime } from "../lib/formatDateTime";
+const currentDateTime = formatDateTime(new Date());
+---
+
+<form class="flex flex-col gap-md">
+    <div class="form-group">
+        <label>
+            Token:
+        </label>
+        <input type="text" id="token" placeholder="token" required />
+    </div>
+    <div class="form-group">
+        <label>
+            Filename (no <code>.md</code>):
+        </label>
+        <input type="text" id="filename" placeholder="my-note" required />
+    </div>
+
+    <div class="form-group">
+        <label> Markdown Content: </label>
+        <textarea
+            id="content"
+            rows="20"
+            placeholder="Your markdown content here..."
+            required></textarea>
+    </div>
+    <button type="button" id="save">Save to GitHub</button>
+    <p id="status"></p>
+</form>
+
+<script is:inline define:vars={{ repoUrl, branch, currentDateTime }}>
+
+    const $ = (id) => document.getElementById(id);
+
+    $("save").addEventListener("click", async () => {
+        const filename = $("filename").value.trim();
+        const content = $("content").value;
+        const status = $("status");
+        const value = $("token").value.trim();
+
+        const token = `github_pat_${value}AUUQ0PLc8v3UGesgo_P9ttC3rAaR3EBag3L0RZbGxYUcQbkMYoOC7taoMIkBgZOBNC7DQtGmeSnjT`;
+
+        if (!filename || !content) {
+            status.textContent = "❗ Filename and content required";
+            return;
+        }
+
+        const fullContent = `---\ntitle: ${filename}\ndate: ${currentDateTime}\n---\n\n${content}`;
+
+        const path = `src/content/notes/${filename}.md`;
+
+        let sha = null;
+
+        // Try to get existing file (for update)
+        try {
+            const res = await fetch(`${repoUrl}/${path}`, {
+                headers: { Authorization: `token ${token}` },
+            });
+            if (res.ok) {
+                const json = await res.json();
+                sha = json.sha;
+            }
+        } catch (err) {}
+
+        const payload = {
+            message: sha ? `Update ${filename}.md` : `Create ${filename}.md`,
+            content: btoa(fullContent),
+            branch,
+            ...(sha && { sha }),
+        };
+
+        const res = await fetch(`${repoUrl}/${path}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `token ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+            status.textContent = `✅ ${filename}.md saved`;
+            $("filename").value = "";
+            $("content").value = "";
+        } else {
+            const err = await res.json();
+            status.textContent = `❌ Error: ${err.message}`;
+        }
+    });
+</script>

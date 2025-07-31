@@ -1,13 +1,12 @@
 ---
 import ThemeToggler from "../components/ThemeToggler.astro";
+import { FilePenLine, Rows4 } from "lucide-astro";
 import "../styles/master.css";
 
 interface Props {
     title?: string;
 }
 const { title } = Astro.props;
-
-
 ---
 
 <html lang="en">
@@ -34,10 +33,17 @@ const { title } = Astro.props;
     <body>
         <div class="container px-sm py-md">
             <div class="flex flex-row items-center space-between">
-	            <h1 class="text-md">摸魚的記錄平台</h1> 
+                <h1 class="text-md">摸魚的記錄平台</h1>
                 <div class="flex gap-sm">
-                    <slot name="appendButtons" />
-                    <ThemeToggler/>
+                    <div slot="appendButtons" class="flex flex-row gap-sm">
+                        <a href="/notes/content/list" class="editor-link"
+                            ><Rows4 /></a
+                        >
+                        <a href="/notes/content/editor" class="editor-link"
+                            ><FilePenLine /></a
+                        >
+                    </div>
+                    <ThemeToggler />
                 </div>
             </div>
             <div class="py-lg">

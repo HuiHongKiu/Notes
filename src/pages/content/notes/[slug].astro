@@ -1,0 +1,32 @@
+---
+export const prerender = false; 
+
+import { getCollection } from "astro:content";
+
+import ContentNavigation from "../../../components/ContentNavigation.astro";
+import MasterLayout from "../../../layouts/MasterLayout.astro";
+
+const { slug } = Astro.params;
+const notes = await getCollection("notes");
+const note = notes.find((n) => n.slug === slug);
+
+if (!note) throw new Error("Note not found");
+
+const { rendered, data } = note;
+---
+
+<MasterLayout>
+  <ContentNavigation slot="appendButtons" />
+
+  <article>
+    <div class="flex space-between items-center">
+      <h1>{data.title}</h1>
+    </div>
+    <div class="note-date">{data.date}</div>
+
+    <div class="py-md"></div>
+
+    <div class="panel" set:html={rendered?.html}></div>
+
+  </article>
+</MasterLayout>
