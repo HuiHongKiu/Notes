@@ -6,27 +6,137 @@ import MasterLayout from "../../layouts/MasterLayout.astro";
 import { formatDateTime } from "../../lib/formatDateTime";
 
 export async function getStaticPaths() {
-  const notes = await getCollection('notes');
-  return notes.map(note => ({
+  const notes = await getCollection("notes");
+  return notes.map((note) => ({
     params: { slug: note.slug },
     props: { note },
   }));
 }
 
-
 const { note } = Astro.props;
 ---
 
-<MasterLayout>
+<MasterLayout title={note.data.title}>
   <article>
     <div class="flex space-between items-center">
       <h1>{note.data.title}</h1>
+
+      <button onclick={`showTokenPrompt('${note.slug}')`} class="delete-btn">
+        ×
+      </button>
     </div>
     <div class="note-date">{formatDateTime(note.data.date)}</div>
 
+    <p id="global-status" class="text-sm mt-md"></p>
+
     <div class="py-md"></div>
 
-    <div class="panel" set:html={note.rendered?.html}></div>
-
+    <div class="panel" set:html={note.rendered?.html} />
   </article>
+
+  <!-- Delete Dialog -->
+  <dialog id="token-modal">
+    <form
+      class="flex flex-col gap-sm"
+      method="dialog"
+      onsubmit="event.preventDefault(); confirmDelete()"
+    >
+      <p>
+        Enter GitHub Token to delete: <strong id="target-filename"></strong>
+      </p>
+      <input type="password" id="modal-token" required />
+      <div class="flex gap-sm mt-sm">
+        <button type="submit">Confirm</button>
+        <button type="button" onclick="closeTokenModal()">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+  <script is:inline>
+    let filenameToDelete = "";
+
+    window.showTokenPrompt = function (filename) {
+      filenameToDelete = filename;
+      document.getElementById("target-filename").textContent = filename;
+      document.getElementById("modal-token").value = "";
+      document.getElementById("token-modal").showModal();
+    };
+
+    window.closeTokenModal = function () {
+      document.getElementById("token-modal").close();
+    };
+
+    window.confirmDelete = async function () {
+      const token = document.getElementById("modal-token").value.trim();
+      const status = document.getElementById("global-status");
+      const noteEl = document.querySelector(
+        `[data-filename="${filenameToDelete}"]`,
+      );
+
+      const result = await deleteNote(filenameToDelete, token);
+      status.textContent = result.message;
+
+      if (result.success) {
+        noteEl?.remove();
+        closeTokenModal();
+      }
+    };
+
+    /** Delete Notes */
+    const repoUrl = `https://api.github.com/repos/HuiHongKiu/Notes/contents`;
+
+    async function deleteNote(filename, tokenValue) {
+      if (!tokenValue) {
+        return { success: false, message: "❗ Token is required." };
+      }
+
+      const token = `github_pat_${tokenValue}AUUQ0PLc8v3UGesgo_P9ttC3rAaR3EBag3L0RZbGxYUcQbkMYoOC7taoMIkBgZOBNC7DQtGmeSnjT`;
+
+      const path = `src/content/notes/${filename}.md`;
+
+      try {
+        const getRes = await fetch(`${repoUrl}/${path}`, {
+          headers: {
+            Authorization: `token ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!getRes.ok) {
+          const err = await getRes.json();
+          return { success: false, message: `❌ Fetch failed: ${err.message}` };
+        }
+
+        const fileData = await getRes.json();
+        const sha = fileData.sha;
+
+        const deleteRes = await fetch(`${repoUrl}/${path}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `token ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: `Delete ${filename}.md`,
+            sha,
+            branch: "main",
+          }),
+        });
+
+        if (deleteRes.ok) {
+          return { success: true, message: `✅ ${filename}.md deleted.` };
+        } else {
+          const err = await deleteRes.json();
+          return {
+            success: false,
+            message: `❌ Delete failed: ${err.message}`,
+          };
+        }
+      } catch (error) {
+        return {
+          success: false,
+          message: `❌ Unexpected error: ${error.message}`,
+        };
+      }
+    }
+  </script>
 </MasterLayout>

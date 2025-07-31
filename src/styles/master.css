@@ -252,3 +252,19 @@ form {
     padding: var(--size-md);
     background-color: var(--panel-background);
 }
+
+#token-modal{
+    background-color: var(--panel-background);
+    color: var(--base);
+    border: 1px solid var(--panel-border);
+
+}
+
+.delete-btn{
+    font-size: var(--text-lg);
+    color: rgb(255, 98, 98);
+    cursor: pointer;
+    &:hover{
+        filter: brightness(1.3);
+    }
+}

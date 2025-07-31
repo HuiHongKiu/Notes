@@ -6,7 +6,7 @@ import { formatDateTime } from "../lib/formatDateTime";
 const notes = await getCollection("notes");
 ---
 
-<MasterLayout title="Notes">  
+<MasterLayout title="Notes">
   <div class="flex space-between items-center mb-md">
     <h2 class="text-lg">Notes List</h2>
     <a href=`${import.meta.env.BASE_URL}/editor` class="btn">+ New Note</a>
@@ -17,17 +17,33 @@ const notes = await getCollection("notes");
       <p>No notes found.</p>
     ) : (
       <ul class="list">
-        {
-          notes.sort((a, b) => new Date(b.data.date!).getTime() - new Date(a.data.date!).getTime())
-            .map((note) => (
-              <li class="note-item">
-                <a href={`${import.meta.env.BASE_URL}/notes/${note.slug}`} class="note-title">
-                  {note.data.title}
-                </a>
-                <span class="note-date">{formatDateTime(new Date(note.data.date!.getTime() + note.data.date!.getTimezoneOffset()*60000))}</span>
-              </li>
-            ))
-        }
+        {notes
+          .sort(
+            (a, b) =>
+              new Date(b.data.date!).getTime() -
+              new Date(a.data.date!).getTime(),
+          )
+          .map((note) => (
+            <li class="note-item">
+              <a
+                href={`${import.meta.env.BASE_URL}/notes/${note.slug}`}
+                class="note-title"
+              >
+                {note.data.title}
+              </a>
+              <div class="flex flex-row gap-sm">
+                <span class="note-date">
+                  {formatDateTime(
+                    new Date(
+                      note.data.date!.getTime() +
+                        note.data.date!.getTimezoneOffset() * 60000,
+                    ),
+                  )}
+                </span>
+
+              </div>
+            </li>
+          ))}
       </ul>
     )
   }
