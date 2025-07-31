@@ -32,9 +32,9 @@ const { title } = Astro.props;
     </head>
     <body>
         <div class="container px-sm py-md">
-            <div class="flex flex-row items-center space-between">
+            <div class="flex flex-row items-center space-between gap-md">
                 <a href=`${import.meta.env.BASE_URL}/list`><h1 class="text-md">摸魚的記錄平台</h1></a>
-                <div class="flex gap-sm">
+                <div class="flex flex-row gap-sm">
                     <div slot="appendButtons" class="flex flex-row gap-sm">
                         <a href=`${import.meta.env.BASE_URL}/list` class="editor-link"
                             ><Rows4 /></a
