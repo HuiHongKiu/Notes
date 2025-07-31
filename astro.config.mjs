@@ -7,6 +7,5 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   site: "https://huihongkiu.github.io/",
   base: "notes",
-  integrations: [mdx()],
-  output: 'server'
+  integrations: [mdx()]
 });
