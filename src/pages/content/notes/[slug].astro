@@ -1,9 +1,6 @@
 ---
-export const prerender = false; 
-
 import { getCollection } from "astro:content";
 
-import ContentNavigation from "../../../components/ContentNavigation.astro";
 import MasterLayout from "../../../layouts/MasterLayout.astro";
 
 const { slug } = Astro.params;
@@ -16,8 +13,6 @@ const { rendered, data } = note;
 ---
 
 <MasterLayout>
-  <ContentNavigation slot="appendButtons" />
-
   <article>
     <div class="flex space-between items-center">
       <h1>{data.title}</h1>
